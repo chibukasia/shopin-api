@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import users from './routes/users'
+import auth from './routes/auth'
 import bodyParser = require("body-parser");
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use('/users', users)
+app.use('/login', auth)
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

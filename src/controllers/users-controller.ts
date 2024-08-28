@@ -1,8 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { Response, Request } from "express";
 import bycrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 
 const prismaClient = new PrismaClient()
+
+const maxAge = 1 * 24 * 60 * 60
+const createToken = (id: number) => {
+    return jwt.sign({id}, 'hash', {expiresIn: maxAge})
+}
 
 export const getAllUsers = async (req: Request, res: Response) =>{
     const users = await prismaClient.user.findMany()
@@ -17,7 +23,29 @@ export const createUser = async (req: Request, res: Response) => {
     const newUser = await prismaClient.user.create({
         data: user
     })
-    res.json(newUser)
+    const token = createToken(newUser.id)
+    res.json({...newUser, token})
+}
+
+export const loginUser = async(req: Request, res: Response) => {
+    const loggedInUser = await prismaClient.user.findUnique({
+        where: {
+            email: req.body.email
+        }
+    })
+
+    if (loggedInUser){
+        const salt = await bycrypt.genSalt()
+        const password = await bycrypt.compare(req.body.password, loggedInUser.password)
+        if(password){
+            const token = createToken(loggedInUser.id)
+            res.json({...loggedInUser, token})
+        }else{
+            res.json({error: 'Invalid password'})
+        }
+    }else{
+        res.json({error: 'Email does not exist'})
+    }
 }
 
 export const getUser = async (req: Request, res: Response) => {
