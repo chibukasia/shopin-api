@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,8 +7,26 @@ datasource db {
   url      = env("DB_URL")
 }
 
+enum Roles {
+  super_admin
+  store_admin
+  store_manager
+  //  more roles later
+
+}
 model User {
   id Int @id @default(autoincrement())
   name String
   email String? @unique
+  role String
+  password String
+  // profile Profile?
+  // profileId Int @unique
 }
+
+// model Profile {
+//   id Int @id @default(autoincrement())
+//   user User @relation(fields: [userId], references: [id])
+//   userId Int @unique
+
+// }
