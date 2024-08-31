@@ -2,7 +2,10 @@ import { PrismaClient } from "@prisma/client";
 import { Response, Request } from "express";
 import bycrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'
+import { z } from "zod";
+import { userSchema } from '../validators/user-validator';
 
+type User = z.infer<typeof userSchema>
 const prismaClient = new PrismaClient()
 
 const maxAge = 1 * 24 * 60 * 60
@@ -16,6 +19,11 @@ export const getAllUsers = async (req: Request, res: Response) =>{
 }
 
 export const createUser = async (req: Request, res: Response) => {
+    const {error} = userSchema.safeParse(req.body)
+    if(error){
+        res.json(error.issues.map((issue) => issue.message))
+        return
+    }  
     const salt = await bycrypt.genSalt()
     const password = await bycrypt.hash(req.body.password, salt)
     const user = {...req.body, password}
