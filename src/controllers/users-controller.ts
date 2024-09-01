@@ -78,10 +78,10 @@ export const loginUser = async (req: Request, res: Response) => {
       const token = createToken(loggedInUser.id);
       res.json({ ...loggedInUser, token });
     } else {
-      res.json({ error: "Invalid password" });
+      res.status(401).json({ error: "Invalid password" });
     }
   } else {
-    res.json({ error: "Email does not exist" });
+    res.status(404).json({ error: "Email does not exist" });
   }
 };
 
