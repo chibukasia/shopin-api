@@ -156,6 +156,7 @@ const userErrorHandler = (error: any, res: Response) => {
       res.json({error: `${error.message}`})
     }
   }else{
+    console.log(error)
     res.json({error: 'Something went wrong'})
   }
 }
