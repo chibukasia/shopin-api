@@ -1,3 +1,3 @@
 # SHOPIN-API
 > [!NOTE]
-> Readme to be updated **soon**
+> **Repo may be made Private in the near future**
