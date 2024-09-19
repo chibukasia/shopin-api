@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
     "build": "npx tsc",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "migrate": "npx prisma migrate dev",
+    "reset": "npx prisma migrate reset",
+    "seed": "npx prisma migrate seed"
   },
   "author": "chibukasia",
   "license": "MIT",

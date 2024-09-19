@@ -10,24 +10,41 @@ datasource db {
 enum Role {
   super_admin
   store_admin
-  store_manager
+  branch_admin
+  data_entry
   cashier
 }
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  DEACTIVATED
+  SUSPENDED
+}
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   name String
   email String? @unique
-  role Role
+  role Role?
   password String
   createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  // profile Profile?
-  // profileId Int @unique
+  updatedAt  DateTime   @default(now()) @updatedAt
+  creater_id String? @unique
+  creater User? @relation("userCreatedBy",fields: [creater_id], references: [id])
+  store Store[]
+  user User[] @relation("userCreatedBy")
 }
 
-// model Profile {
-//   id Int @id @default(autoincrement())
-//   user User @relation(fields: [userId], references: [id])
-//   userId Int @unique
-
-// }
+model Store {
+  id String @id @default(uuid())
+  store_name String
+  country String
+  documents Json[]
+  logo String
+  description String
+  user User @relation(fields: [user_id], references: [id])
+  user_id String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  status Status @default(value: ACTIVE)
+}
