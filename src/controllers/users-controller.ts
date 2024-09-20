@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import { Response, Request } from "express";
 import bycrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { z, ZodIssue } from "zod";
 import { userSchema } from "../validators/user-validator";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
@@ -151,6 +150,9 @@ const findUser = async (req: Request, res: Response) => {
     where: {
       id: req.params.id ?? req.user?.id,
     },
+    include: {
+      creater: true,
+    }
   });
   if (!user) {
     res.status(404).json({ error: "User not found" });
