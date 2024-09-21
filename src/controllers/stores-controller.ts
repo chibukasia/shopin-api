@@ -122,7 +122,6 @@ export const updateStoreDetails = async(req: Request, res: Response) => {
         }
       })
       if(!store) return res.status(404).json({error: 'Store not found'})
-        console.log(store)
       res.status(201).json(store)
     }else{
       return res.status(404).json({error: 'Permission denied'})
