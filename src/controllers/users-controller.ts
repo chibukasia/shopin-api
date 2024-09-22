@@ -3,7 +3,10 @@ import { Response, Request } from "express";
 import bycrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { userSchema } from "../validators/user-validator";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/library";
 
 const prismaClient = new PrismaClient();
 
@@ -34,7 +37,7 @@ export const createUser = async (req: Request, res: Response) => {
     const newUser = await prismaClient.user.create({
       data: user,
     });
-    const token = createToken(newUser.id, newUser.role ?? '');
+    const token = createToken(newUser.id, newUser.role ?? "");
     res.status(201).json({ ...newUser, token });
   } catch (error: any) {
     // res.json(error?.issues.map((issue: ZodIssue) => issue.message));
@@ -65,7 +68,7 @@ export const createNewRoleUser = async (req: Request, res: Response) => {
           },
         },
       });
-      const token = createToken(newUser.id, newUser.role ?? '');
+      const token = createToken(newUser.id, newUser.role ?? "");
       res.status(201).json({ ...newUser, token });
     }
   } catch (error) {
@@ -87,7 +90,7 @@ export const loginUser = async (req: Request, res: Response) => {
         loggedInUser.password
       );
       if (password) {
-        const token = createToken(loggedInUser.id, loggedInUser.role ?? '');
+        const token = createToken(loggedInUser.id, loggedInUser.role ?? "");
         res.status(201).json({ ...loggedInUser, token });
       } else {
         res.status(401).json({ error: "Invalid password" });
@@ -152,7 +155,7 @@ const findUser = async (req: Request, res: Response) => {
     },
     include: {
       creater: true,
-    }
+    },
   });
   if (!user) {
     res.status(404).json({ error: "User not found" });
@@ -172,6 +175,21 @@ const userErrorHandler = (error: any, res: Response) => {
     if (error.code === "P2011") {
       res.json({ error: `${error.message}` });
     }
+  } else if (error instanceof PrismaClientValidationError) {
+    console.log(error);
+    const searchText = "Invalid value for argument";
+    const lastIndex = error.message.lastIndexOf(searchText);
+    const errorMessage = error.message.substring(lastIndex);
+    // const regex = /Invalid value for argument `role`.*?(?=Expected)/;
+
+    // const match = errorMessage.match(regex);
+    // if (match) {
+    //   const extractedErrorMessage = match[0].trim();
+    //   console.log(extractedErrorMessage);
+    // } else {
+    //   console.log("No match found");
+    // }
+    res.status(500).json({error: errorMessage});
   } else {
     console.log(error);
     res.status(500).json({ error: "Something went wrong" });
