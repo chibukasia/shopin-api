@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { loginUser } from "../controllers/users-controller";
+import { loggedinUser, loginUser } from "../controllers/users-controller";
+import verifyToken from "../middlewares/authMiddleware";
 
 const router = Router()
 
 router.post('/', loginUser)
+router.get('/me/', verifyToken, loggedinUser)
 
 export default router

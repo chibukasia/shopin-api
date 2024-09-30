@@ -148,6 +148,10 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+export const loggedinUser = async (req: Request, res: Response) =>{ 
+  const user = await findUser(req, res)
+  res.status(200).json(user)
+}
 const findUser = async (req: Request, res: Response) => {
   const user = await prismaClient.user.findUnique({
     where: {
