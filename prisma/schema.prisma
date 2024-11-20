@@ -20,6 +20,7 @@ enum Status {
   INACTIVE
   DEACTIVATED
   SUSPENDED
+  ASSIGNED
 }
 model User {
   id String @id @default(uuid())
@@ -33,6 +34,7 @@ model User {
   creater User? @relation("userCreatedBy",fields: [creater_id], references: [id])
   store Store[]
   user User[] @relation("userCreatedBy")
+  status Status @default(INACTIVE)
   // branch Branch[]
 }
 

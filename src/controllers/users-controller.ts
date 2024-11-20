@@ -24,6 +24,29 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserBranchAdmins = async (req: Request, res: Response) => {
+  const userId = req.user?.id
+  const role = req.user?.role
+
+
+  try {
+    if(role === 'store_admin'){
+      const branchAdmins = await prismaClient.user.findMany({
+        where: {
+          creater_id: userId,
+          role: 'branch_admin',
+        }
+      })
+     res.status(200).json(branchAdmins)
+    }else {
+      res.status(403).json({error: 'Forbidden access'})
+    }
+    
+  } catch (error) {
+    userErrorHandler(error, res)
+  }  
+}
+
 export const createUser = async (req: Request, res: Response) => {
   const { error } = userSchema.safeParse(req.body);
   if (error) {
@@ -52,7 +75,6 @@ export const createNewRoleUser = async (req: Request, res: Response) => {
     return;
   }
   const userId = req.user?.id;
-  console.log(userId);
   const salt = await bycrypt.genSalt();
   const password = await bycrypt.hash(req.body.password, salt);
   const user = { ...req.body, password };
@@ -72,7 +94,7 @@ export const createNewRoleUser = async (req: Request, res: Response) => {
       res.status(201).json({ ...newUser, token });
     }
   } catch (error) {
-    userErrorHandler(error, res);
+    // userErrorHandler(error, res);
   }
 };
 export const loginUser = async (req: Request, res: Response) => {
@@ -152,6 +174,9 @@ export const loggedinUser = async (req: Request, res: Response) =>{
   const user = await findUser(req, res)
   res.status(200).json(user)
 }
+
+
+
 const findUser = async (req: Request, res: Response) => {
   const user = await prismaClient.user.findUnique({
     where: {
@@ -167,6 +192,7 @@ const findUser = async (req: Request, res: Response) => {
   }
   return user;
 };
+
 
 const userErrorHandler = (error: any, res: Response) => {
   if (error instanceof PrismaClientKnownRequestError) {
