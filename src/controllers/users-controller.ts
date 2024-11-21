@@ -27,8 +27,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUserBranchAdmins = async (req: Request, res: Response) => {
   const userId = req.user?.id
   const role = req.user?.role
-
-
   try {
     if(role === 'store_admin'){
       const branchAdmins = await prismaClient.user.findMany({
@@ -94,7 +92,8 @@ export const createNewRoleUser = async (req: Request, res: Response) => {
       res.status(201).json({ ...newUser, token });
     }
   } catch (error) {
-    // userErrorHandler(error, res);
+    console.log(error)
+    userErrorHandler(error, res);
   }
 };
 export const loginUser = async (req: Request, res: Response) => {

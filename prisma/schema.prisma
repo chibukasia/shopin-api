@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DB_URL")
 }
 
 enum Role {
@@ -30,7 +30,7 @@ model User {
   password String
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
-  creater_id String? @unique
+  creater_id String?
   creater User? @relation("userCreatedBy",fields: [creater_id], references: [id])
   store Store[]
   user User[] @relation("userCreatedBy")
