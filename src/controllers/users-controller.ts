@@ -15,9 +15,35 @@ const createToken = (id: string, role: string) => {
   return jwt.sign({ id, role }, "hash", { expiresIn: maxAge });
 };
 
+const userSelect = {
+  select: {
+    name: true,
+    email: true,
+    id: true,
+    role: true,
+    status: true,
+    createdAt: true,
+    updatedAt: true,
+    creater: {
+      select: {
+        name: true,
+        email: true,
+        id: true,
+        role: true,
+        status: true,
+      },
+    },
+  },
+}
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await prismaClient.user.findMany();
+    const users = await prismaClient.user.findMany({
+      select: userSelect.select,
+      orderBy: {
+        createdAt: "asc",
+        name: "asc",
+      },
+    });
     res.status(200).json(users);
   } catch (error) {
     userErrorHandler(error, res);
@@ -25,25 +51,28 @@ export const getAllUsers = async (req: Request, res: Response) => {
 };
 
 export const getUserBranchAdmins = async (req: Request, res: Response) => {
-  const userId = req.user?.id
-  const role = req.user?.role
+  const userId = req.user?.id;
+  const role = req.user?.role;
   try {
-    if(role === 'store_admin'){
+    if (role === "store_admin") {
       const branchAdmins = await prismaClient.user.findMany({
         where: {
           creater_id: userId,
-          role: 'branch_admin',
-        }
-      })
-     res.status(200).json(branchAdmins)
-    }else {
-      res.status(403).json({error: 'Forbidden access'})
+          role: "branch_admin",
+        },
+        select: userSelect.select,
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+      res.status(200).json(branchAdmins);
+    } else {
+      res.status(403).json({ error: "Forbidden access" });
     }
-    
   } catch (error) {
-    userErrorHandler(error, res)
-  }  
-}
+    userErrorHandler(error, res);
+  }
+};
 
 export const createUser = async (req: Request, res: Response) => {
   const { error } = userSchema.safeParse(req.body);
@@ -57,6 +86,7 @@ export const createUser = async (req: Request, res: Response) => {
     const user = { ...req.body, password };
     const newUser = await prismaClient.user.create({
       data: user,
+      select: userSelect.select,
     });
     const token = createToken(newUser.id, newUser.role ?? "");
     res.status(201).json({ ...newUser, token });
@@ -87,12 +117,13 @@ export const createNewRoleUser = async (req: Request, res: Response) => {
             },
           },
         },
+        select: userSelect.select,
       });
       const token = createToken(newUser.id, newUser.role ?? "");
       res.status(201).json({ ...newUser, token });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     userErrorHandler(error, res);
   }
 };
@@ -169,21 +200,17 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export const loggedinUser = async (req: Request, res: Response) =>{ 
-  const user = await findUser(req, res)
-  res.status(200).json(user)
-}
-
-
+export const loggedinUser = async (req: Request, res: Response) => {
+  const user = await findUser(req, res);
+  res.status(200).json(user);
+};
 
 const findUser = async (req: Request, res: Response) => {
   const user = await prismaClient.user.findUnique({
     where: {
       id: req.params.id ?? req.user?.id,
     },
-    include: {
-      creater: true,
-    },
+    select: userSelect.select,
   });
   if (!user) {
     res.status(404).json({ error: "User not found" });
@@ -191,7 +218,6 @@ const findUser = async (req: Request, res: Response) => {
   }
   return user;
 };
-
 
 const userErrorHandler = (error: any, res: Response) => {
   if (error instanceof PrismaClientKnownRequestError) {
@@ -218,7 +244,7 @@ const userErrorHandler = (error: any, res: Response) => {
     // } else {
     //   console.log("No match found");
     // }
-    res.status(500).json({error: errorMessage});
+    res.status(500).json({ error: errorMessage });
   } else {
     console.log(error);
     res.status(500).json({ error: "Something went wrong" });

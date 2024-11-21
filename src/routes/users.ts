@@ -9,6 +9,7 @@ router.get('/', verifyToken, getAllUsers)
 router.post('/', createUser)
 
 router.post('/create_user', verifyToken, createNewRoleUser)
+router.get('/user-branch-admins', verifyToken, getUserBranchAdmins)
 
 router.get('/:id', verifyToken, getUser)
 
@@ -16,7 +17,7 @@ router.patch('/:id', verifyToken, updateUser)
 
 router.delete('/:id', verifyToken, deleteUser)
 
-router.get('/user-branch-admins', verifyToken, getUserBranchAdmins)
+
 
 
 
