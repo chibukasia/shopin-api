@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
+const prisma = new PrismaClient()
+
 export const createBranch = async (req: Request, res: Response) => {
     res.status(200).json({message: 'Success'})
 }
@@ -30,6 +32,9 @@ export const deleteBranch = async (req: Request, res: Response) => {
     res.status(201).json({message: "Deleted"})
 }
 
+const getenerateBranchUniqueCode = async() => {
+    
+}
 const branchErrorHandler = (error: any, res: Response) => {
     if(error instanceof PrismaClientKnownRequestError){
         if (error.code === "P2001") {

@@ -165,7 +165,7 @@ const storeErrorHandler = (error: any, res: Response) => {
   console.log(error);
   if (error instanceof PrismaClientKnownRequestError) {
     if (error.code === "P2001") {
-      res.status(404).json({ error: "User not found" });
+      res.status(404).json({ error: "Store not found" });
       return;
     }
     if (error.code === "P2011") {
