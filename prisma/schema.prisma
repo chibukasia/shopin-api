@@ -35,7 +35,7 @@ model User {
   store Store[]
   user User[] @relation("userCreatedBy")
   status Status @default(INACTIVE)
-  // branch Branch[]
+  branch Branch[]
 }
 
 model Store {
@@ -50,21 +50,20 @@ model Store {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   status Status @default(value: ACTIVE)
-  // branch Branch[]
+  branch Branch[]
 }
 
-// model Branch{
-//   id String @id @default(uuid())
-//   branch_name String
-//   location String
-//   description String?
-//   store_code String @unique
-//   store Store @relation(fields: [store_id], references: [id])
-//   store_id String
-//   user_id String
-//   user User @relation(fields: [user_id], references: [id])
-//   hours Json[]
-//   address String
-//   county_or_province String
-//   town String?
-// }
+model Branch{
+  id String @id @default(uuid())
+  branch_name String
+  description String?
+  store_code String @unique
+  store Store @relation(fields: [store_id], references: [id])
+  store_id String
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  operational_hours Json
+  address String
+  county_or_province String
+  town String?
+}
