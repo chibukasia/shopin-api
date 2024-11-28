@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { storeSchema } from "../validators/store-validator";
+import { generateUniqueCode } from "../utils";
 
 const prisma = new PrismaClient();
 
@@ -34,9 +35,12 @@ export const createStore = async (req: Request, res: Response) => {
           res.json(error.issues.map((issue) => issue.message));
           return;
         }
+
+        const store_code = generateUniqueCode(req.body.store_name)
         const store = await prisma.store.create({
           data: {
             ...req.body,
+            store_code,
             user: {
               connect: {
                 id: userId,

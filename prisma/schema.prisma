@@ -13,6 +13,7 @@ enum Role {
   branch_admin
   data_entry
   cashier
+  customer
 }
 
 enum Status {
@@ -67,4 +68,6 @@ model Branch{
   address String
   county_or_province String
   town String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
 }

@@ -41,7 +41,6 @@ export const getAllUsers = async (req: Request, res: Response) => {
       select: userSelect.select,
       orderBy: {
         createdAt: "asc",
-        name: "asc",
       },
     });
     res.status(200).json(users);
