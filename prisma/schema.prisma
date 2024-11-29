@@ -36,7 +36,7 @@ model User {
   store Store[]
   user User[] @relation("userCreatedBy")
   status Status @default(INACTIVE)
-  branch Branch[]
+  branch Branch?
 }
 
 model Store {
@@ -62,7 +62,7 @@ model Branch{
   branch_code String @unique
   store Store @relation(fields: [store_id], references: [id])
   store_id String
-  user_id String
+  user_id String @unique
   user User @relation(fields: [user_id], references: [id])
   operational_hours Json
   address String

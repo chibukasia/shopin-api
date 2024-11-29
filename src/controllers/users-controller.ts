@@ -17,6 +17,7 @@ const createToken = (id: string, role: string) => {
 
 const userSelect = {
   select: {
+    
     name: true,
     email: true,
     id: true,
@@ -33,12 +34,18 @@ const userSelect = {
         status: true,
       },
     },
+    branch: {
+      include: {
+        store: true
+      }
+    },
   },
 }
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prismaClient.user.findMany({
       select: userSelect.select,
+      
       orderBy: {
         createdAt: "asc",
       },
