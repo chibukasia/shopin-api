@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -63,6 +64,7 @@ model Branch{
   store Store @relation(fields: [store_id], references: [id])
   store_id String
   user_id String @unique
+  status Status @default(ACTIVE)
   user User @relation(fields: [user_id], references: [id])
   operational_hours Json
   address String
