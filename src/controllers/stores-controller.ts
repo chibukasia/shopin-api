@@ -73,7 +73,12 @@ export const getAllStores = async (req: Request, res: Response) => {
           user: {
             select: userSelect.select
           },
-          branch: true
+          branch: true,
+          _count: {
+            select: {
+              branch: true
+            }
+          }
         },
       });
       return res.status(200).json(stores);
@@ -101,7 +106,12 @@ export const getUserStores = async (req: Request, res: Response) => {
           user: {
             select: userSelect.select
           },
-          branch: true
+          branch: true,
+          _count: {
+            select: {
+              branch: true
+            }
+          }
         },
       });
       return res.status(200).json(stores);
@@ -129,22 +139,18 @@ export const getStoreDetails = async (req: Request, res: Response) => {
             updatedAt: true,
           },
         },
+        _count: {
+          select: {
+            branch: true
+          }
+        }
       },
       
     });
-
-    const branch_count = await prisma.branch.aggregate({
-      where: {
-        store_id: req.params.id
-      },
-      _count: {
-        store_id: true
-      }
-    })
     if (!store) {
       return res.status(404).json({ error: "Store not found" });
     }
-    res.status(200).json({...store, branch_count: branch_count._count.store_id});
+    res.status(200).json({...store, branch_count: store._count.branch});
   } catch (error) {
     storeErrorHandler(error, res);
   }
@@ -166,6 +172,7 @@ export const updateStoreDetails = async (req: Request, res: Response) => {
             select: userSelect.select
           },
         },
+
       });
       if (!store) return res.status(404).json({ error: "Store not found" });
       res.status(201).json(store);
