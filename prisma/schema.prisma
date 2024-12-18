@@ -24,6 +24,31 @@ enum Status {
   SUSPENDED
   ASSIGNED
 }
+
+enum ProductType {
+  simple
+  grouped
+  variable
+}
+
+enum TaxStatus {
+  taxable
+  shipping_only
+  none
+}
+
+enum TaxClass {
+  standard
+  reduced_rate
+  zero_rate
+}
+
+enum StockStatus {
+  out_of_stock
+  in_stock
+  low_on_stock
+}
+
 model User {
   id String @id @default(uuid())
   name String
@@ -38,6 +63,8 @@ model User {
   user User[] @relation("userCreatedBy")
   status Status @default(INACTIVE)
   branch Branch?
+  product_reviews ProductReview[]
+  branch_reviews BranchReview[]
 }
 
 model Store {
@@ -72,4 +99,93 @@ model Branch{
   town String?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
+  products Product[]
+  branch_reviews BranchReview[]
+}
+
+model Product {
+  id String @id @default(uuid())
+  branch_id String
+  branch Branch @relation(fields: [branch_id], references: [id])
+  primary_image String
+  image_gallery String[]
+  name String
+  short_description String?
+  long_description String 
+  price Float
+  sale_price Float?
+  sku String?
+  asin String?
+  upc String?
+  inventory Inventory?
+  shipping ProductShipping?
+  categories ProductCategory[]
+  attributes Attribute[]
+  product_reviews ProductReview[]
+  product_type ProductType @default(value: simple)
+  tags String[]
+  tax_status TaxStatus @default(value: taxable)
+  tax_class TaxClass @default(value: standard)
+}
+
+model Inventory {
+  id String @id @default(uuid())
+  product_id String @unique
+  product Product @relation(fields: [product_id], references: [id])
+  manage_stock Boolean @default(true)
+  stock_status StockStatus @default(in_stock)
+  minimum_inventory Int
+  quantity Int
+  sold_independently Boolean @default(true)
+}
+
+model Attribute {
+  id String @id @default(uuid())
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  name String
+  values String[]
+}
+
+model ProductShipping {
+  id String @id @default(uuid())
+  weight Float
+  dimensions Json
+  shipping_class String?
+  product_id String @unique
+  product Product @relation(fields: [product_id], references: [id])
+}
+
+model ProductCategory {
+  id String @id @default(uuid())
+  name String
+  parent_category String?
+  child_categories String[]
+  products Product[]
+}
+
+model ProductReview {
+  id String @id @default(uuid())
+  rating Float @default(0)
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  comment String
+}
+
+model BranchReview {
+  id String @id @default(uuid())
+  rating Float @default(0)
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  branch_id String
+  branch Branch @relation(fields: [branch_id], references: [id])
+  comment String
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String
+  description String
 }
