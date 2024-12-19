@@ -49,6 +49,13 @@ enum StockStatus {
   low_on_stock
 }
 
+enum ProductStatus {
+  DELETED
+  ACTIVE
+  SOLD
+  DEACTIVATED
+}
+
 model User {
   id String @id @default(uuid())
   name String
@@ -110,6 +117,7 @@ model Product {
   primary_image String
   image_gallery String[]
   name String
+  status ProductStatus @default(ACTIVE)
   short_description String?
   long_description String 
   price Float
