@@ -31,6 +31,12 @@ export const attributeScheme = z.object({
     .array(z.string())
     .min(1, { message: "At least one attribute value is needed" }),
 });
+
+export const productReviewSchema = z.object({
+    product_id: z.string({required_error: 'Product is required'}),
+    rating: z.number({required_error: 'Rating is required'}),
+    comment: z.string().optional()
+})
 const productSchema = z.object({
   branch_id: z.string({ required_error: "Branch is required" }),
   name: z.string({ required_error: "Product name is required" }),
