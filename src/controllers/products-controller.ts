@@ -6,7 +6,25 @@ const prisma = new PrismaClient();
 
 export const getBranchProducts = async (req: Request, res: Response) => {
   try {
-    res.status(200).json([]);
+    const { branch_id } = req.params;
+    if (!branch_id) {
+      res.status(400).json({ error: "Branch is required" });
+      return;
+    }
+    const products = await prisma.product.findMany({
+      where:{
+        branch_id: branch_id
+      },
+      include:{
+        product_reviews: true,
+        inventory: true,
+        shipping: true,
+        categories: true,
+        attributes: true
+      }
+    })
+    res.status(200).json(products);
+    return;
   } catch (error) {
     productsErrorHandler(error, res)
   }

@@ -159,7 +159,7 @@ model ProductShipping {
   id String @id @default(uuid())
   weight Float
   dimensions Json
-  shipping_class String?
+  shipping_class String? @default(value: "standard")
   product_id String @unique
   product Product @relation(fields: [product_id], references: [id])
 }
