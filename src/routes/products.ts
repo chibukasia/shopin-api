@@ -4,7 +4,7 @@ import { createProduct, deleteProduct, getBranchProducts, getProductDetails, get
 
 const router  = Router()
 
-router.post('/', verifyToken, createProduct)
+router.post('/branch_id', verifyToken, createProduct)
 router.get('/:branch_id', verifyToken, getBranchProducts)
 router.get('/top-selling-products/', verifyToken, getTopSellingProducts)
 router.get('/products-summary', verifyToken, getProductsSummary)

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import productSchema from "../validators/product-validator";
 
 const prisma = new PrismaClient();
 
@@ -32,6 +33,17 @@ export const getBranchProducts = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    const branch_id = req.body.branch_id;
+
+    const {error} = productSchema.safeParse(req.body);
+
+    if(error){
+      res.status(400).json(error.issues.map((issue) => issue.message));
+      return;
+    }
+    
     res.status(201).json({ message: "Success" });
   } catch (error) {
     productsErrorHandler(error, res)

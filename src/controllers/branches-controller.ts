@@ -87,6 +87,7 @@ export const getAllBranches = async (req: Request, res: Response) => {
             },
           },
         },
+        branch_reviews: true,
         user: {
           select: userSelect,
         },
@@ -123,6 +124,7 @@ export const getUserBranches = async (req: Request, res: Response) => {
               },
             },
           },
+          branch_reviews: true,
           user: {
             select: userSelect,
           },
@@ -150,6 +152,7 @@ export const getStoreBranches = async (req: Request, res: Response) => {
         user: {
           select: userSelect,
         },
+        branch_reviews: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -170,18 +173,20 @@ export const getBranchDetails = async (req: Request, res: Response) => {
       },
       include: {
         user: {
-            select: userSelect
-        }, store: {
-            include: {
-                user: {
-                    select: userSelect
-                }
-            }
-        }
-      }
+          select: userSelect,
+        },
+        branch_reviews: true,
+        store: {
+          include: {
+            user: {
+              select: userSelect,
+            },
+          },
+        },
+      },
     });
 
-    return res.status(200).json(branch)
+    return res.status(200).json(branch);
   } catch (error) {
     branchErrorHandler(error, res);
   }
@@ -189,45 +194,47 @@ export const getBranchDetails = async (req: Request, res: Response) => {
 
 export const updateBranch = async (req: Request, res: Response) => {
   try {
-    if (!req.user) return res.json(401).json({error: "Login to update branch"})
-    const {id, role} = req.user
+    if (!req.user)
+      return res.json(401).json({ error: "Login to update branch" });
+    const { id, role } = req.user;
 
-    if(role === 'store_admin'){
-        const branch = await prisma.branch.update({
-            where: {
-                user_id: id,
-                id: req.params.id,
-            },
-            data: req.body
-        })
+    if (role === "store_admin") {
+      const branch = await prisma.branch.update({
+        where: {
+          user_id: id,
+          id: req.params.id,
+        },
+        data: req.body,
+      });
 
-        return res.status(201).json(branch)
-    }else{
-        return res.status(403).json({error: "Not authorized"})
+      return res.status(201).json(branch);
+    } else {
+      return res.status(403).json({ error: "Not authorized" });
     }
   } catch (error) {
-    branchErrorHandler(error, res)
+    branchErrorHandler(error, res);
   }
 };
 
 export const deleteBranch = async (req: Request, res: Response) => {
-  try{
-    if (!req.user) return res.json(401).json({error: "Login to delete branch"})
-    const {id, role} = req.user
+  try {
+    if (!req.user)
+      return res.json(401).json({ error: "Login to delete branch" });
+    const { id, role } = req.user;
 
-    if(role === 'store_admin'){
-        await prisma.branch.delete({
-            where: {
-                id: req.params.id, 
-                user_id: id
-            }
-        })
-        return res.status(204).json({message: "Branch deleted"})
-    }else{
-        return res.status(403).json({error: "Not authorized"})
+    if (role === "store_admin") {
+      await prisma.branch.delete({
+        where: {
+          id: req.params.id,
+          user_id: id,
+        },
+      });
+      return res.status(204).json({ message: "Branch deleted" });
+    } else {
+      return res.status(403).json({ error: "Not authorized" });
     }
-  } catch(error){
-    branchErrorHandler(error, res)
+  } catch (error) {
+    branchErrorHandler(error, res);
   }
 };
 
