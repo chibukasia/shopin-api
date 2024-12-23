@@ -73,8 +73,20 @@ model User {
   branch Branch?
   product_reviews ProductReview[]
   branch_reviews BranchReview[]
+  profile Profile?
 }
 
+model Profile {
+  id String @id @default(uuid())
+  user_id String @unique
+  user User @relation(fields: [user_id], references: [id])
+  phone_number String?
+  profile_picture String?
+  bio String?
+  country String?
+  county_state_province String?
+  city String?
+  }
 model Store {
   id String @id @default(uuid())
   store_name String
