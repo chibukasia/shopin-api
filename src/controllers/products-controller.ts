@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import productSchema from "../validators/product-validator";
+import QRCode from "qrcode";
 
 const prisma = new PrismaClient();
 
@@ -369,3 +370,28 @@ const productsErrorHandler = (error: any, res: Response) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
+
+
+const sampleData = {
+  name: "Product Name",
+  description: "Product Description",
+  short_description: "Product Short Description",
+  primary_image: "Product Image",
+  image_gallery: ["Image1", "Image2"],
+  status: "PUBLISHED",
+  price: 1000,
+  sale_price: 900,
+  sku: "SKU",
+  asin: "ASIN",
+  upc: "UPC",
+  product_type: "SIMPLE",
+}
+
+let stringData = JSON.stringify(sampleData);
+
+QRCode.toFile('qrcode.png', stringData, (err)=>{ 
+  if(err) throw err
+  console.log("DONE")
+})
+
+
