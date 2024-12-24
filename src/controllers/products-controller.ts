@@ -5,6 +5,15 @@ import productSchema from "../validators/product-validator";
 
 const prisma = new PrismaClient();
 
+const product_includes = {
+  product_reviews: true,
+  inventory: true,
+  categories: true,
+  attributes: true,
+  shipping: true,
+  branch: true,
+}
+
 export const getBranchProducts = async (req: Request, res: Response) => {
   try {
     const { branch_id } = req.params;
@@ -79,14 +88,7 @@ export const createProduct = async (req: Request, res: Response) => {
           connect: req.body.categories,
         },
       },
-      include: {
-        product_reviews: true,
-        inventory: true,
-        categories: true,
-        attributes: true,
-        shipping: true,
-        branch: true,
-      },
+      include: product_includes,
     });
     res.status(201).json(product);
   } catch (error) {
@@ -106,14 +108,7 @@ export const getProductDetails = async (req: Request, res: Response) => {
       where: {
         id: id,
       },
-      include: {
-        product_reviews: true,
-        inventory: true,
-        categories: true,
-        attributes: true,
-        shipping: true,
-        branch: true,
-      },
+      include: product_includes,
     });
     if(!product){
       res.status(404).json({error: "Product not found"})
@@ -168,14 +163,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         //   set: req.body.categories,
         // },
       },
-      include: {
-        product_reviews: true,
-        inventory: true,
-        categories: true,
-        attributes: true,
-        shipping: true,
-        branch: true,
-      },
+      include: product_includes,
     })
     res.status(201).json(product);
   } catch (error) {
@@ -183,6 +171,124 @@ export const updateProduct = async (req: Request, res: Response) => {
   }
 };
 
+export const updateProductInventory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        inventory: {
+          update: req.body,
+        },
+      },
+      include: product_includes,
+    })
+
+    if(!product){
+      res.status(404).json({error: "Product not found"})
+      return;
+    }
+    res.status(201).json(product);
+  } catch (error) {
+    productsErrorHandler(error, res);
+  }
+}
+
+export const updateProductShipping = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        shipping: {
+          update: req.body,
+        },
+      },
+      include: product_includes,
+    })
+
+    if(!product){
+      res.status(404).json({error: "Product not found"})
+      return;
+    }
+    res.status(201).json(product);
+  } catch (error) {
+    productsErrorHandler(error, res);
+  }
+}
+
+export const updateProductAttributes = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data:{
+        attributes: {
+          update: req.body,
+        }
+    },
+    include: product_includes})
+
+    if(!product){
+      res.status(404).json({error: "Product not found"})
+      return;
+    }
+    res.status(201).json(product);
+  } catch (error) {
+    productsErrorHandler(error, res);
+  }
+}
+
+export const updateProductCategories = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        categories: {
+          update: req.body,
+        },
+      },
+      include: product_includes,
+    })
+
+    if(!product){
+      res.status(404).json({error: "Product not found"})
+      return;
+    }
+    res.status(201).json(product);
+  } catch (error) {
+    productsErrorHandler(error, res);
+  }
+}
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
