@@ -13,21 +13,21 @@ export const getBranchProducts = async (req: Request, res: Response) => {
       return;
     }
     const products = await prisma.product.findMany({
-      where:{
-        branch_id: branch_id
+      where: {
+        branch_id: branch_id,
       },
-      include:{
+      include: {
         product_reviews: true,
         inventory: true,
         shipping: true,
         categories: true,
-        attributes: true
-      }
-    })
+        attributes: true,
+      },
+    });
     res.status(200).json(products);
     return;
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
@@ -37,58 +37,214 @@ export const createProduct = async (req: Request, res: Response) => {
     const role = req.user?.role;
     const branch_id = req.body.branch_id;
 
-    const {error} = productSchema.safeParse(req.body);
+    const { error } = productSchema.safeParse(req.body);
 
-    if(error){
+    if (error) {
       res.status(400).json(error.issues.map((issue) => issue.message));
       return;
     }
-    
-    res.status(201).json({ message: "Success" });
+    const product = await prisma.product.create({
+      data: {
+        branch_id: req.body.branch_id,
+        name: req.body.name,
+        long_description: req.body.description,
+        short_description: req.body.short_description,
+        primary_image: req.body.primary_image,
+        image_gallery: req.body.image_gallery,
+        status: req.body.status,
+        price: req.body.price,
+        sale_price: req.body.sale_price,
+        sku: req.body.sku,
+        asin: req.body.asin,
+        upc: req.body.upc,
+        product_type: req.body.product_type,
+        tags: req.body.tags,
+        tax_class: req.body.tax_class,
+        tax_status: req.body.tax_status,
+        branch: {
+          connect: {
+            id: branch_id,
+          },
+        },
+        inventory: {
+          create: req.body.inventory,
+        },
+        shipping: {
+          create: req.body.shipping,
+        },
+        attributes: {
+          create: req.body.attributes,
+        },
+        categories: {
+          connect: req.body.categories,
+        },
+      },
+      include: {
+        product_reviews: true,
+        inventory: true,
+        categories: true,
+        attributes: true,
+        shipping: true,
+        branch: true,
+      },
+    });
+    res.status(201).json(product);
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
 export const getProductDetails = async (req: Request, res: Response) => {
   try {
-    res.status(200).json({ message: "Success" });
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        product_reviews: true,
+        inventory: true,
+        categories: true,
+        attributes: true,
+        shipping: true,
+        branch: true,
+      },
+    });
+    if(!product){
+      res.status(404).json({error: "Product not found"})
+      return;
+    }
+    res.status(200).json(product);
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    res.status(201).json({ message: "Success" });
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        ...req.body,
+        // name: req.body.name,
+        // long_description: req.body.description,
+        // short_description: req.body.short_description,
+        // primary_image: req.body.primary_image,
+        // image_gallery: req.body.image_gallery,
+        // status: req.body.status,
+        // price: req.body.price,
+        // sale_price: req.body.sale_price,
+        // sku: req.body.sku,
+        // asin: req.body.asin,
+        // upc: req.body.upc,
+        // product_type: req.body.product_type,
+        // tags: req.body.tags,
+        // tax_class: req.body.tax_class,
+        // tax_status: req.body.tax_status,
+        // inventory: {
+        //   update: req.body.inventory,
+        // },
+        // shipping: {
+        //   update: req.body.shipping,
+        // },
+        // attributes: {
+        //   update: req.body.attributes,
+        // },
+        // categories: {
+        //   set: req.body.categories,
+        // },
+      },
+      include: {
+        product_reviews: true,
+        inventory: true,
+        categories: true,
+        attributes: true,
+        shipping: true,
+        branch: true,
+      },
+    })
+    res.status(201).json(product);
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    res.status(204).json({ message: "Deleted" });
+    const { id } = req.params;
+    if (!id) {
+      res.status(400).json({ error: "Product is required" });
+      return;
+    }
+
+    const product = await prisma.product.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: "DELETED",
+      },
+    })
+    res.status(204).json({ message: "Product Deleted" });
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
+export const deleteManyProducts = async (req: Request, res: Response) => {
+  try {
+    const { ids } = req.body;
+    if (!ids) {
+      res.status(400).json({ error: "Products are required" });
+      return;
+    }
+
+    const products = await prisma.product.updateMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: {
+        status: "DELETED",
+      },
+    })
+  } catch (error) {
+    productsErrorHandler(error, res);
+  }
+}
+
 export const getTopSellingProducts = async (req: Request, res: Response) => {
   try {
+    /**@todo TO BE UPDATED BASED ON ORDERS */
     res.status(200).json([]);
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
 export const getProductsSummary = async (req: Request, res: Response) => {
   try {
+    /**@todo TO BE UPDATED BASED ON ORDERS */
     res.status(200).json({
       message: "Summary",
     });
   } catch (error) {
-    productsErrorHandler(error, res)
+    productsErrorHandler(error, res);
   }
 };
 
