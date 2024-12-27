@@ -74,6 +74,8 @@ model User {
   product_reviews ProductReview[]
   branch_reviews BranchReview[]
   profile Profile?
+  orders Order[]
+  payment_address PaymentAddress[]
 }
 
 model Profile {
@@ -147,6 +149,7 @@ model Product {
   tags String[]
   tax_status TaxStatus @default(value: taxable)
   tax_class TaxClass @default(value: standard)
+  order_items OrderItem[]
 }
 
 model Inventory {
@@ -209,4 +212,72 @@ model Category {
   id String @id @default(uuid())
   name String
   description String
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+  order_id String
+  order Order @relation(fields: [order_id], references: [id])
+  product_id String
+  product Product @relation(fields: [product_id], references: [id])
+  quantity Int
+  price Float
+  total Float
+}
+
+model Order {
+  id String @id @default(uuid())
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  order_number String @unique
+  status Status @default(value: ASSIGNED)
+  payment_method String
+  payment_status Status @default(value: ASSIGNED)
+  shipping_address String
+  billing_address String
+  shipping_method String
+  shipping_cost Float
+  total Float
+  order_items OrderItem[]
+  payment Payment[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
+}
+
+model Payment {
+  id String @id @default(uuid())
+  order_id String
+  order Order @relation(fields: [order_id], references: [id])
+  amount Float
+  status Status @default(value: ASSIGNED)
+  payment_method String
+  payment_status Status @default(value: ASSIGNED)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
+}
+
+model PaymentMethod {
+  id String @id @default(uuid())
+  name String
+  description String
+  status Status @default(value: ACTIVE)
+}
+
+model ShippingMethod {
+  id String @id @default(uuid())
+  name String
+  description String
+  status Status @default(value: ACTIVE)
+}
+
+model PaymentAddress {
+  id String @id @default(uuid())
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  address String
+  country String
+  county_or_province String
+  city String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
 }
