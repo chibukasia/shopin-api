@@ -84,7 +84,7 @@ const categoryErrorHandler = (error: any, res: Response) => {
       return;
     }
     if (error.code === "P2001") {
-      res.status(404).json({ error: "Branch not found" });
+      res.status(404).json({ error: "Category not found" });
       return;
     }
     if (error.code === "P2011") {
