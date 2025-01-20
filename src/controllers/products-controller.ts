@@ -371,7 +371,7 @@ const productsErrorHandler = (error: any, res: Response) => {
   }
 };
 
-
+// QR Code generation test
 const sampleData = {
   name: "Product Name",
   description: "Product Description",

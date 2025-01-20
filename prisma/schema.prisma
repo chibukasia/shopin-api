@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
-  directUrl = env("DATABASE_URL")
+  // directUrl = env("DATABASE_URL")
 }
 
 enum Role {
@@ -54,6 +54,23 @@ enum ProductStatus {
   ACTIVE
   SOLD
   DEACTIVATED
+}
+
+enum OrderStatus {
+  PENDING
+  ACKNOWLEDGED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }
 
 model User {
@@ -122,6 +139,7 @@ model Branch{
   updatedAt  DateTime   @default(now()) @updatedAt
   products Product[]
   branch_reviews BranchReview[]
+  orders Order[]
 }
 
 model Product {
@@ -229,28 +247,31 @@ model Order {
   user_id String
   user User @relation(fields: [user_id], references: [id])
   order_number String @unique
-  status Status @default(value: ASSIGNED)
-  payment_method String
-  payment_status Status @default(value: ASSIGNED)
+  status OrderStatus @default(value: PENDING)
+  // payment_method String
+  // payment_status PaymentStatus @default(value: PENDING)
   shipping_address_id String
   shipping_address ShippingAddress @relation(fields: [shipping_address_id], references: [id])
-  shipping_method String
+  shipping_method_id String
+  shipping_method ShippingMethod @relation(fields: [shipping_method_id], references: [id])
   shipping_cost Float
   total Float
+  branch_id String
+  branch Branch @relation(fields: [branch_id], references: [id])
   order_items OrderItem[]
-  payment Payment[]
+  payment Payment?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
 }
 
 model Payment {
   id String @id @default(uuid())
-  order_id String
+  order_id String @unique
   order Order @relation(fields: [order_id], references: [id])
   amount Float
   payment_method_id String
   payment_method PaymentMethod @relation(fields: [payment_method_id], references: [id])
-  payment_status Status @default(value: ASSIGNED)
+  payment_status PaymentStatus @default(value: PENDING)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
 }
@@ -268,6 +289,7 @@ model ShippingMethod {
   name String
   description String
   status Status @default(value: ACTIVE)
+  orders Order[]
 }
 
 model ShippingAddress {
