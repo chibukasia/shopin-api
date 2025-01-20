@@ -74,7 +74,7 @@ model User {
   branch_reviews BranchReview[]
   profile Profile?
   orders Order[]
-  payment_address PaymentAddress[]
+  payment_address ShippingAddress[]
 }
 
 model Profile {
@@ -232,8 +232,8 @@ model Order {
   status Status @default(value: ASSIGNED)
   payment_method String
   payment_status Status @default(value: ASSIGNED)
-  shipping_address String
-  billing_address String
+  shipping_address_id String
+  shipping_address ShippingAddress @relation(fields: [shipping_address_id], references: [id])
   shipping_method String
   shipping_cost Float
   total Float
@@ -248,8 +248,8 @@ model Payment {
   order_id String
   order Order @relation(fields: [order_id], references: [id])
   amount Float
-  status Status @default(value: ASSIGNED)
-  payment_method String
+  payment_method_id String
+  payment_method PaymentMethod @relation(fields: [payment_method_id], references: [id])
   payment_status Status @default(value: ASSIGNED)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
@@ -260,6 +260,7 @@ model PaymentMethod {
   name String
   description String
   status Status @default(value: ACTIVE)
+  payments Payment[]
 }
 
 model ShippingMethod {
@@ -269,13 +270,14 @@ model ShippingMethod {
   status Status @default(value: ACTIVE)
 }
 
-model PaymentAddress {
+model ShippingAddress {
   id String @id @default(uuid())
   user_id String
   user User @relation(fields: [user_id], references: [id])
   address String
   country String
   county_or_province String
+  orders Order[]
   city String
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @default(now()) @updatedAt
