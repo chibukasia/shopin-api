@@ -62,7 +62,58 @@ export const getUserOrders = async(req: Request, res: Response) => {
 }
 export const createOrder = async(req: Request, res: Response) => {
   try {
-    res.json({ message: "Order created" });
+    const userId = req?.user?.id;
+    const otherId = req.query.user_id
+    const lastOrder = await prisma.order.findFirst({
+        orderBy: {
+            createdAt: "desc",
+          },
+    })
+
+    if(lastOrder){
+        const lastOrderNumber = lastOrder.order_number
+        const orderNumber = parseInt(lastOrderNumber) + 1
+        req.body.order_number = orderNumber.toString()
+    }else{
+        req.body.order_number = '00001'
+    }
+    const order = await prisma.order.create({
+        // @ts-expect-error type error
+        data: {
+            user_id: userId ?? '',
+            order_number: req.body.order_number,
+            shipping_cost: req.body.shipping_cost,
+            total: req.body.total,
+            order_items: {
+                createMany: {
+                    data: req.body.order_items
+                }
+            },
+            shipping_address: {
+                connectOrCreate: {
+                    where: {
+                        id: req.body.shipping_address.id
+                    },
+                    create: req.body.shipping_address
+                }
+            },
+            shipping_method: {
+                connect: req.body.shipping_method_id
+            },
+            payment: {
+                create: req.body.payment
+            },
+            branch_id: req.body.branch_id,
+            branch: {
+                connect: req.body.branch_id
+            }
+        },
+        include: order_includes
+    });
+    if(!order) return res.status(400).json({error: "Order not created"})
+    if(order){
+        res.status(201).json(order)
+    }
   } catch (error) {
     orderErrorHandler(error, res);
   }
@@ -92,19 +143,30 @@ export const getOrderDetails = async(req: Request, res: Response) => {
 
 export const updateOrder = async (req: Request, res: Response) => {
     try {
-        res.json({ message: "Order updated" });
+        const orderId = req.params.id;
+        if (!orderId) {
+            return res.status(400).json({ error: "Order is required" });
+        }
+        const order = await prisma.order.update({
+            where: {
+                id: orderId,
+            },
+            data: req.body,
+            include: order_includes
+        });
+        res.status(201).json(order);
     } catch (error) {
         orderErrorHandler(error, res);
     }
 }
 
-export const deleteOrder = async (req: Request, res: Response) => {
-    try {
-        res.json({ message: "Order deleted" });
-    } catch (error) {
-        orderErrorHandler(error, res);
-    }
-}
+// export const deleteOrder = async (req: Request, res: Response) => {
+//     try {
+//         res.json({ message: "Order deleted" });
+//     } catch (error) {
+//         orderErrorHandler(error, res);
+//     }
+// }
 
 const orderErrorHandler = (error: any, res: Response) => {
     if (error instanceof PrismaClientKnownRequestError){
