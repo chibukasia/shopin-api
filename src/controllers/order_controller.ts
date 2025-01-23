@@ -63,7 +63,7 @@ export const getUserOrders = async(req: Request, res: Response) => {
 export const createOrder = async(req: Request, res: Response) => {
   try {
     const userId = req?.user?.id;
-    const otherId = req.query.user_id
+    const otherUserId = req.query.user_id
     const lastOrder = await prisma.order.findFirst({
         orderBy: {
             createdAt: "desc",
@@ -80,7 +80,7 @@ export const createOrder = async(req: Request, res: Response) => {
     const order = await prisma.order.create({
         // @ts-expect-error type error
         data: {
-            user_id: userId ?? '',
+            user_id: userId ?? otherUserId as string,
             order_number: req.body.order_number,
             shipping_cost: req.body.shipping_cost,
             total: req.body.total,
