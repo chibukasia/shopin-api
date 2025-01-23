@@ -71,7 +71,7 @@ export const createOrder = async(req: Request, res: Response) => {
     })
 
     if(lastOrder){
-        const lastOrderNumber = lastOrder.order_number
+        const lastOrderNumber = lastOrder.order_number.padStart(5, '0')
         const orderNumber = parseInt(lastOrderNumber) + 1
         req.body.order_number = orderNumber.toString()
     }else{
