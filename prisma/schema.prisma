@@ -92,6 +92,8 @@ model User {
   profile Profile?
   orders Order[]
   payment_address ShippingAddress[]
+  attributes Attribute[]
+  categories ProductCategory[]
 }
 
 model Profile {
@@ -182,8 +184,9 @@ model Inventory {
 
 model Attribute {
   id String @id @default(uuid())
-  product_id String
-  product Product @relation(fields: [product_id], references: [id])
+  user_id String
+  products Product[]
+  user User @relation(fields: [user_id], references: [id])
   name String
   values String[]
 }
@@ -200,8 +203,11 @@ model ProductShipping {
 model ProductCategory {
   id String @id @default(uuid())
   name String
-  parent_category String?
-  child_categories String[]
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  parent_category_id String?
+  parent_category ProductCategory? @relation("parentCategory",fields: [parent_category_id], references: [id])
+  child_categories ProductCategory[] @relation("parentCategory")
   products Product[]
 }
 

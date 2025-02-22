@@ -97,6 +97,64 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
+export const createAttributes = async (req: Request, res: Response) => {
+  try{
+    const userId = req.user?.id;
+    const role = req.user?.role;
+
+    if (!userId) {
+      res.status(400).json({ error: "User is not authenticated" });
+      return;
+    }
+    if(role !== "branch_admin"){
+      res.status(403).json({error: "Unauthorized user"})
+      return;
+    }
+
+    const attribute = await prisma.attribute.create({
+      data: {
+        ...req.body,
+        connect:{
+          user_id: userId
+        }
+      },
+      
+    })
+
+    res.status(201).json(attribute)
+  }catch(error){
+
+  }
+};
+
+export const createProductCategory = async(req: Request, res: Response) => {
+  try{
+    const userId = req.user?.id;
+    const role = req.user?.role;
+
+    if (!userId) {
+      res.status(400).json({ error: "User is not authenticated" });
+      return;
+    }
+    if(role !== "branch_admin"){
+      res.status(403).json({error: "Unauthorized user"})
+      return;
+    }
+
+    const category = await prisma.category.create({
+      data: {
+        ...req.body,
+        connect:{
+          user_id: userId
+        }
+      },
+    })
+    res.status(201).json(category)
+  }catch(error){
+
+  }
+};
+
 export const getProductDetails = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

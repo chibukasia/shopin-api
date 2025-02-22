@@ -1,7 +1,9 @@
 import { Router } from "express";
 import verifyToken from "../middlewares/authMiddleware";
 import {
+  createAttributes,
   createProduct,
+  createProductCategory,
   deleteManyProducts,
   deleteProduct,
   getBranchProducts,
@@ -23,6 +25,9 @@ router.get("/top-selling-products/", verifyToken, getTopSellingProducts);
 router.get("/products-summary", verifyToken, getProductsSummary);
 
 router.patch("/delete-many", verifyToken, deleteManyProducts);
+
+router.post("/product-categories", verifyToken, createProductCategory);
+router.post("/attributes", verifyToken, createAttributes);
 
 router.get("/:id/", verifyToken, getProductDetails);
 router.patch("/:id/", verifyToken, updateProduct);
