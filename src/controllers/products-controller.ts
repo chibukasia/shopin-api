@@ -115,7 +115,8 @@ export const createAttributes = async (req: Request, res: Response) => {
       data: {
         ...req.body,
         connect:{
-          user_id: userId
+          user_id: userId,
+          branch_id: req.body.branch_id
         }
       },
       
@@ -141,20 +142,46 @@ export const createProductCategory = async(req: Request, res: Response) => {
       return;
     }
 
-    const category = await prisma.category.create({
+    const category = await prisma.productCategory.create({
       data: {
         ...req.body,
-        connect:{
-          user_id: userId
-        }
+          user_id: userId,
+          branch_id: req.body.branch_id,
+        
       },
     })
-    res.status(201).json(category)
+    res.status(201).json({message: "succes",category})
   }catch(error){
-
+    console.log(error)
+    res.json({error: "Error creating product categories"})
   }
 };
 
+export const getAttributes = async(req: Request, res: Response) => {
+  const branch_id = req.params.branch_id
+
+  const attributes = await prisma.attribute.findMany({
+    where: {
+      branch_id: branch_id
+    }
+  })
+  res.status(200).json(attributes)
+}
+
+export const getProductCategories = async(req: Request, res: Response) => {
+  try {
+    const branch_id = req.params.branch_id
+    const categories = await prisma.productCategory.findMany({
+      where: {
+        branch_id: branch_id
+      }
+    })
+    console.log(categories)
+    res.status(200).json(categories)
+  } catch (error) {
+    console.log(error)
+  }
+}
 export const getProductDetails = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -430,26 +457,26 @@ const productsErrorHandler = (error: any, res: Response) => {
 };
 
 // QR Code generation test
-const sampleData = {
-  name: "Product Name",
-  description: "Product Description",
-  short_description: "Product Short Description",
-  primary_image: "Product Image",
-  image_gallery: ["Image1", "Image2"],
-  status: "PUBLISHED",
-  price: 1000,
-  sale_price: 900,
-  sku: "SKU",
-  asin: "ASIN",
-  upc: "UPC",
-  product_type: "SIMPLE",
-}
+// const sampleData = {
+//   name: "Product Name",
+//   description: "Product Description",
+//   short_description: "Product Short Description",
+//   primary_image: "Product Image",
+//   image_gallery: ["Image1", "Image2"],
+//   status: "PUBLISHED",
+//   price: 1000,
+//   sale_price: 900,
+//   sku: "SKU",
+//   asin: "ASIN",
+//   upc: "UPC",
+//   product_type: "SIMPLE",
+// }
 
-let stringData = JSON.stringify(sampleData);
+// let stringData = JSON.stringify(sampleData);
 
-QRCode.toFile('qrcode.png', stringData, (err)=>{ 
-  if(err) throw err
-  console.log("DONE")
-})
+// QRCode.toFile('qrcode.png', stringData, (err)=>{ 
+//   if(err) throw err
+//   console.log("DONE")
+// })
 
 

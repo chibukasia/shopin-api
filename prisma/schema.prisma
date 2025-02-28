@@ -142,6 +142,8 @@ model Branch{
   products Product[]
   branch_reviews BranchReview[]
   orders Order[]
+  attributes Attribute []
+  product_categories ProductCategory[]
 }
 
 model Product {
@@ -185,6 +187,8 @@ model Inventory {
 model Attribute {
   id String @id @default(uuid())
   user_id String
+  branch_id String
+  branch Branch @relation(fields: [branch_id], references: [id])
   products Product[]
   user User @relation(fields: [user_id], references: [id])
   name String
@@ -202,8 +206,10 @@ model ProductShipping {
 
 model ProductCategory {
   id String @id @default(uuid())
-  name String
+  name String @unique
   user_id String
+  branch_id String
+  branch Branch @relation(fields: [branch_id], references: [id])
   user User @relation(fields: [user_id], references: [id])
   parent_category_id String?
   parent_category ProductCategory? @relation("parentCategory",fields: [parent_category_id], references: [id])
