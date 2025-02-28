@@ -20,16 +20,16 @@ export const shippingSchema = z
   })
   .optional();
 
-export const categorySchema = z.object({
+export const productCategorySchema = z.object({
   name: z.string(),
-  parent_category: z.string().optional(),
+  parent_category_id: z.string().optional(),
 });
 
-export const attributeScheme = z.object({
+export const attributeSchema = z.object({
   name: z.string({ required_error: "Attribute name required" }),
   values: z
     .array(z.string())
-    .min(1, { message: "At least one attribute value is needed" }),
+    .nonempty({ message: "At least one attribute value is needed" }),
 });
 
 export const productReviewSchema = z.object({
@@ -53,10 +53,10 @@ const productSchema = z.object({
   inventory: inventorySchema,
   shipping: shippingSchema,
   categories: z
-    .array(categorySchema)
+    .array(productCategorySchema)
     .min(1, { message: "At least one category is needed" })
     .optional(),
-  atttributes: z.array(attributeScheme).optional(),
+  atttributes: z.array(attributeSchema).optional(),
 });
 
 export default productSchema;

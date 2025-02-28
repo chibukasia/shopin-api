@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import productSchema from "../validators/product-validator";
-import QRCode from "qrcode";
+import productSchema, { attributeSchema, productCategorySchema } from "../validators/product-validator";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +12,7 @@ const product_includes = {
   attributes: true,
   shipping: true,
   branch: true,
-}
+};
 
 export const getBranchProducts = async (req: Request, res: Response) => {
   try {
@@ -98,90 +97,110 @@ export const createProduct = async (req: Request, res: Response) => {
 };
 
 export const createAttributes = async (req: Request, res: Response) => {
-  try{
+  try {
     const userId = req.user?.id;
     const role = req.user?.role;
+
+    const {error} = attributeSchema.safeParse(req.body)
+    if (error) {
+      res.status(400).json(error.issues.map((issue) => issue.message));
+      return;
+    }
 
     if (!userId) {
       res.status(400).json({ error: "User is not authenticated" });
       return;
     }
-    if(role !== "branch_admin"){
-      res.status(403).json({error: "Unauthorized user"})
+    if (role !== "branch_admin") {
+      res.status(403).json({ error: "Unauthorized user" });
       return;
     }
 
     const attribute = await prisma.attribute.create({
       data: {
         ...req.body,
-        connect:{
-          user_id: userId,
-          branch_id: req.body.branch_id
-        }
+        user_id: userId,
+        branch_id: req.body.branch_id,
       },
-      
-    })
+    });
 
-    res.status(201).json(attribute)
-  }catch(error){
-
+    res.status(201).json(attribute);
+  } catch (error) {
+    console.log(error);
+    productsErrorHandler(error, res, "Product Category not found");
   }
 };
 
-export const createProductCategory = async(req: Request, res: Response) => {
-  try{
+export const createProductCategory = async (req: Request, res: Response) => {
+  try {
     const userId = req.user?.id;
     const role = req.user?.role;
 
+    const {error} = productCategorySchema.safeParse(req.body)
+    if (error) {
+      res.status(400).json(error.issues.map((issue) => issue.message));
+      return;
+    }
     if (!userId) {
       res.status(400).json({ error: "User is not authenticated" });
       return;
     }
-    if(role !== "branch_admin"){
-      res.status(403).json({error: "Unauthorized user"})
+    if (role !== "branch_admin") {
+      res.status(403).json({ error: "Unauthorized user" });
       return;
     }
 
     const category = await prisma.productCategory.create({
       data: {
         ...req.body,
-          user_id: userId,
-          branch_id: req.body.branch_id,
-        
+        user_id: userId,
+        branch_id: req.body.branch_id,
       },
-    })
-    res.status(201).json({message: "succes",category})
-  }catch(error){
-    console.log(error)
-    res.json({error: "Error creating product categories"})
+      include: {
+        parent_category: true,
+        child_categories: true,
+      },
+    });
+    res.status(201).json({ message: "succes", category });
+  } catch (error) {
+    console.log(error);
+    productsErrorHandler(error, res, "Product Category not found");
   }
 };
 
-export const getAttributes = async(req: Request, res: Response) => {
-  const branch_id = req.params.branch_id
-
-  const attributes = await prisma.attribute.findMany({
-    where: {
-      branch_id: branch_id
-    }
-  })
-  res.status(200).json(attributes)
-}
-
-export const getProductCategories = async(req: Request, res: Response) => {
+export const getAttributes = async (req: Request, res: Response) => {
   try {
-    const branch_id = req.params.branch_id
+    const branch_id = req.params.branch_id;
+
+    const attributes = await prisma.attribute.findMany({
+      where: {
+        branch_id: branch_id,
+      },
+    });
+    res.status(200).json(attributes);
+  } catch (error) {
+    productsErrorHandler(error, res, "Attribute not found");
+  }
+};
+
+export const getProductCategories = async (req: Request, res: Response) => {
+  try {
+    const branch_id = req.params.branch_id;
     const categories = await prisma.productCategory.findMany({
       where: {
-        branch_id: branch_id
-      }
-    })
-    console.log(categories)
-    res.status(200).json(categories)
+        branch_id: branch_id,
+      },
+      include: {
+        parent_category: true,
+        child_categories: true,
+      },
+    });
+    res.status(200).json(categories);
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    productsErrorHandler(error, res, "Product Category not found");
   }
-}
+};
 export const getProductDetails = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -196,8 +215,8 @@ export const getProductDetails = async (req: Request, res: Response) => {
       },
       include: product_includes,
     });
-    if(!product){
-      res.status(404).json({error: "Product not found"})
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
       return;
     }
     res.status(200).json(product);
@@ -213,7 +232,6 @@ export const updateProduct = async (req: Request, res: Response) => {
       res.status(400).json({ error: "Product is required" });
       return;
     }
-
 
     const product = await prisma.product.update({
       where: {
@@ -250,7 +268,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         // },
       },
       include: product_includes,
-    })
+    });
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
@@ -275,17 +293,17 @@ export const updateProductInventory = async (req: Request, res: Response) => {
         },
       },
       include: product_includes,
-    })
+    });
 
-    if(!product){
-      res.status(404).json({error: "Product not found"})
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
       return;
     }
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
   }
-}
+};
 
 export const updateProductShipping = async (req: Request, res: Response) => {
   try {
@@ -305,17 +323,17 @@ export const updateProductShipping = async (req: Request, res: Response) => {
         },
       },
       include: product_includes,
-    })
+    });
 
-    if(!product){
-      res.status(404).json({error: "Product not found"})
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
       return;
     }
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
   }
-}
+};
 
 export const updateProductAttributes = async (req: Request, res: Response) => {
   try {
@@ -329,22 +347,23 @@ export const updateProductAttributes = async (req: Request, res: Response) => {
       where: {
         id: id,
       },
-      data:{
+      data: {
         attributes: {
           update: req.body,
-        }
-    },
-    include: product_includes})
+        },
+      },
+      include: product_includes,
+    });
 
-    if(!product){
-      res.status(404).json({error: "Product not found"})
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
       return;
     }
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
   }
-}
+};
 
 export const updateProductCategories = async (req: Request, res: Response) => {
   try {
@@ -364,17 +383,17 @@ export const updateProductCategories = async (req: Request, res: Response) => {
         },
       },
       include: product_includes,
-    })
+    });
 
-    if(!product){
-      res.status(404).json({error: "Product not found"})
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
       return;
     }
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
   }
-}
+};
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -390,7 +409,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       data: {
         status: "DELETED",
       },
-    })
+    });
     res.status(204).json({ message: "Product Deleted" });
   } catch (error) {
     productsErrorHandler(error, res);
@@ -414,11 +433,12 @@ export const deleteManyProducts = async (req: Request, res: Response) => {
       data: {
         status: "DELETED",
       },
-    })
+    });
+    res.status(204).json({message: "Delete success"})
   } catch (error) {
     productsErrorHandler(error, res);
   }
-}
+};
 
 export const getTopSellingProducts = async (req: Request, res: Response) => {
   try {
@@ -440,43 +460,19 @@ export const getProductsSummary = async (req: Request, res: Response) => {
   }
 };
 
-const productsErrorHandler = (error: any, res: Response) => {
+const productsErrorHandler = (error: any, res: Response, message?: string) => {
   console.log(error);
   if (error instanceof PrismaClientKnownRequestError) {
     if (error.code === "P2001") {
-      res.status(404).json({ error: "Product not found" });
+      res.status(404).json({ error: message ?? "Product not found" });
       return;
     }
     if (error.code === "P2011") {
-      res.json({ error: `${error.message}` });
+      res.json({ error: error.message });
       return;
     }
   } else {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
-
-// QR Code generation test
-// const sampleData = {
-//   name: "Product Name",
-//   description: "Product Description",
-//   short_description: "Product Short Description",
-//   primary_image: "Product Image",
-//   image_gallery: ["Image1", "Image2"],
-//   status: "PUBLISHED",
-//   price: 1000,
-//   sale_price: 900,
-//   sku: "SKU",
-//   asin: "ASIN",
-//   upc: "UPC",
-//   product_type: "SIMPLE",
-// }
-
-// let stringData = JSON.stringify(sampleData);
-
-// QRCode.toFile('qrcode.png', stringData, (err)=>{ 
-//   if(err) throw err
-//   console.log("DONE")
-// })
-
 
