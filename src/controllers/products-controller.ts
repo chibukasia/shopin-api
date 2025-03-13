@@ -9,7 +9,6 @@ const product_includes = {
   product_reviews: true,
   inventory: true,
   categories: true,
-  attributes: true,
   shipping: true,
   branch: true,
 };
@@ -30,7 +29,6 @@ export const getBranchProducts = async (req: Request, res: Response) => {
         inventory: true,
         shipping: true,
         categories: true,
-        attributes: true,
       },
     });
     res.status(200).json(products);
@@ -52,44 +50,28 @@ export const createProduct = async (req: Request, res: Response) => {
       res.status(400).json(error.issues.map((issue) => issue.message));
       return;
     }
+
     const product = await prisma.product.create({
       data: {
-        branch_id: req.body.branch_id,
-        name: req.body.name,
-        long_description: req.body.description,
-        short_description: req.body.short_description,
-        primary_image: req.body.primary_image,
-        image_gallery: req.body.image_gallery,
-        status: req.body.status,
-        price: req.body.price,
-        sale_price: req.body.sale_price,
-        sku: req.body.sku,
-        asin: req.body.asin,
-        upc: req.body.upc,
-        product_type: req.body.product_type,
-        tags: req.body.tags,
-        tax_class: req.body.tax_class,
-        tax_status: req.body.tax_status,
+        ...req.body,
         branch: {
           connect: {
-            id: branch_id,
+            id: req.body.branch_id,
           },
         },
-        inventory: {
-          create: req.body.inventory,
-        },
-        shipping: {
-          create: req.body.shipping,
-        },
-        attributes: {
-          create: req.body.attributes,
-        },
-        categories: {
-          connect: req.body.categories,
-        },
+        inventory: req.body.inventory ? { create: req.body.inventory } : undefined,
+        shipping: req.body.shipping ? { create: req.body.shipping } : undefined,
+        categories: req.body.categories ? { connect: req.body.categories.map((id: string) => ({ id })) } : undefined,
       },
-      include: product_includes,
+      include: {
+        product_reviews: true,
+        inventory: true,
+        categories: true,
+        shipping: true,
+        branch: true, 
+      },
     });
+    
     res.status(201).json(product);
   } catch (error) {
     productsErrorHandler(error, res);
@@ -348,9 +330,7 @@ export const updateProductAttributes = async (req: Request, res: Response) => {
         id: id,
       },
       data: {
-        attributes: {
-          update: req.body,
-        },
+        attributes: req.body
       },
       include: product_includes,
     });

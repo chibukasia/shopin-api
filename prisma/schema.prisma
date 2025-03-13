@@ -164,7 +164,7 @@ model Product {
   inventory Inventory?
   shipping ProductShipping?
   categories ProductCategory[]
-  attributes Attribute[]
+  attributes Json[]
   product_reviews ProductReview[]
   product_type ProductType @default(value: simple)
   tags String[]
@@ -189,7 +189,6 @@ model Attribute {
   user_id String
   branch_id String
   branch Branch @relation(fields: [branch_id], references: [id])
-  products Product[]
   user User @relation(fields: [user_id], references: [id])
   name String
   values String[]

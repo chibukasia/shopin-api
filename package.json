@@ -15,7 +15,6 @@
   "author": "chibukasia",
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^6.0.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -26,14 +25,17 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.14.6",
     "@types/qrcode": "^1.5.5",
+    "i": "^0.3.7",
     "nodemon": "^3.1.0",
-    "prisma": "^6.0.0",
+    "npm": "^11.2.0",
+    "prisma": "^6.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }

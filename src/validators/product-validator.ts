@@ -42,7 +42,7 @@ const productSchema = z.object({
   name: z.string({ required_error: "Product name is required" }),
   price: z.number({ required_error: "Product price is required" }),
   primary_image: z.string({ required_error: "Product image is required" }),
-  image_gallery: z.array(z.string()).optional(),
+  gallery_images: z.array(z.string()).optional(),
   status: z.enum(["DELETED", "ACTIVE", "SOLD", "DEACTIVATED"]).optional(),
   short_description: z.string().optional(),
   long_description: z.string(),
@@ -52,10 +52,8 @@ const productSchema = z.object({
   upc: z.string().optional(),
   inventory: inventorySchema,
   shipping: shippingSchema,
-  categories: z
-    .array(productCategorySchema)
-    .min(1, { message: "At least one category is needed" })
-    .optional(),
+  categories: z.string().array()
+    .min(1, { message: "At least one category is needed" }),
   atttributes: z.array(attributeSchema).optional(),
 });
 

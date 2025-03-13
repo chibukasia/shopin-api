@@ -21,7 +21,7 @@ import {
 
 const router = Router();
 
-router.post("/branch_id", verifyToken, createProduct);
+router.post("/", verifyToken, createProduct);
 router.get("/:branch_id", verifyToken, getBranchProducts);
 router.get("/top-selling-products/", verifyToken, getTopSellingProducts);
 router.get("/products-summary", verifyToken, getProductsSummary);
