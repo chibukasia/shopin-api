@@ -35,7 +35,7 @@ router.post("/attributes", verifyToken, createAttributes);
 router.get("/product-categories/:branch_id/", verifyToken, getProductCategories);
 router.get("/attributes/:branch_id/", verifyToken, getAttributes);
 
-router.patch("/:id/", verifyToken, updateProduct);
+router.put("/:id/", verifyToken, updateProduct);
 router.patch("/:id/delete", verifyToken, deleteProduct);
 router.patch("/:id/inventory", verifyToken, updateProductInventory);
 router.patch("/:id/attributes", verifyToken, updateProductAttributes);

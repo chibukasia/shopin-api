@@ -23,6 +23,7 @@ export const getBranchProducts = async (req: Request, res: Response) => {
     const products = await prisma.product.findMany({
       where: {
         branch_id: branch_id,
+        status: { not: "DELETED" },
       },
       include: {
         product_reviews: true,
@@ -221,33 +222,9 @@ export const updateProduct = async (req: Request, res: Response) => {
       },
       data: {
         ...req.body,
-        // name: req.body.name,
-        // long_description: req.body.description,
-        // short_description: req.body.short_description,
-        // primary_image: req.body.primary_image,
-        // image_gallery: req.body.image_gallery,
-        // status: req.body.status,
-        // price: req.body.price,
-        // sale_price: req.body.sale_price,
-        // sku: req.body.sku,
-        // asin: req.body.asin,
-        // upc: req.body.upc,
-        // product_type: req.body.product_type,
-        // tags: req.body.tags,
-        // tax_class: req.body.tax_class,
-        // tax_status: req.body.tax_status,
-        // inventory: {
-        //   update: req.body.inventory,
-        // },
-        // shipping: {
-        //   update: req.body.shipping,
-        // },
-        // attributes: {
-        //   update: req.body.attributes,
-        // },
-        // categories: {
-        //   set: req.body.categories,
-        // },
+        inventory: req.body.inventory ? { update: req.body.inventory } : undefined,
+        shipping: req.body.shipping ? { update: req.body.shipping } : undefined,
+        categories: req.body.categories ? { connect: req.body.categories.map((id: string) => ({ id })) } : undefined,
       },
       include: product_includes,
     });
