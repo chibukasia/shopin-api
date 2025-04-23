@@ -22,7 +22,9 @@ import {
 const router = Router();
 
 router.post("/", verifyToken, createProduct);
-router.get("/:branch_id", verifyToken, getBranchProducts);
+router.get("/:id/", verifyToken, getProductDetails);
+
+router.get("/branch/:branch_id", verifyToken, getBranchProducts);
 router.get("/top-selling-products/", verifyToken, getTopSellingProducts);
 router.get("/products-summary", verifyToken, getProductsSummary);
 
@@ -33,7 +35,6 @@ router.post("/attributes", verifyToken, createAttributes);
 router.get("/product-categories/:branch_id/", verifyToken, getProductCategories);
 router.get("/attributes/:branch_id/", verifyToken, getAttributes);
 
-router.get("/:id/", verifyToken, getProductDetails);
 router.patch("/:id/", verifyToken, updateProduct);
 router.patch("/:id/delete", verifyToken, deleteProduct);
 router.patch("/:id/inventory", verifyToken, updateProductInventory);
