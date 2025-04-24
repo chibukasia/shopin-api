@@ -51,13 +51,14 @@ export const createProduct = async (req: Request, res: Response) => {
       res.status(400).json(error.issues.map((issue) => issue.message));
       return;
     }
+    delete req.body.branch_id;
 
     const product = await prisma.product.create({
       data: {
         ...req.body,
         branch: {
           connect: {
-            id: req.body.branch_id,
+            id: branch_id,
           },
         },
         inventory: req.body.inventory ? { create: req.body.inventory } : undefined,
