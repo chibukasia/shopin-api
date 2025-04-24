@@ -154,8 +154,8 @@ model Product {
   image_gallery String[]
   name String
   status ProductStatus @default(ACTIVE)
-  short_description String?
-  long_description String 
+  short_description String
+  long_description String? 
   price Float
   sale_price Float?
   sku String?
